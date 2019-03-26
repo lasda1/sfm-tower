@@ -19,7 +19,7 @@ const eventSchema = mongoose.Schema(
             require : true
         },
         maxNum:{
-            type: number,
+            type: Number,
             require: true
         },
         startDate:{
@@ -30,6 +30,7 @@ const eventSchema = mongoose.Schema(
             type:Date,
             require :true
         },
+        participators:[{}]
 
     }
 )

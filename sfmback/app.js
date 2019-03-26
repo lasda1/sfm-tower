@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
-
+var eventsRouter =require('./routes/events');
 
 const mongoose = require('mongoose');
 const expressGraphQl = require('express-graphql');
@@ -33,7 +33,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-
+app.use('/events',eventsRouter);
 app.use(
     "/graphQl",
     cors(),
@@ -57,7 +57,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.send("jj")
 });
 
 module.exports = app;
