@@ -30,7 +30,8 @@ const eventSchema = mongoose.Schema(
             type:Date,
             require :true
         },
-        participators:[{}]
+        participators:[{}],
+        interested:[{}]
 
     }
 )
