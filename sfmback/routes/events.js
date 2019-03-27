@@ -1,8 +1,9 @@
 var express = require('express');
 var router = express.Router();
-var Event =require('../models/event');
-router.post('/addEvent', function(req, res, next) {
-    const event =new Event({
+var Event = require('../models/event');
+var User = require('../models/user')
+router.post('/addEvent', function (req, res, next) {
+    const event = new Event({
         name: req.body.name,
         description: req.body.description,
         lieu: req.body.lieu,
@@ -12,51 +13,131 @@ router.post('/addEvent', function(req, res, next) {
         endDate: req.body.endDate
 
     });
-  
+
     console.log(event)
     event
-    .save()
-    .then(res=>{
-        console.log(res);
-        
-    })
-    .catch(err=>{
-        console.log(err)
-    });
+        .save()
+        .then(res => {
+            console.log(res);
+
+        })
+        .catch(err => {
+            console.log(err)
+        });
     res.status(200).json({
-        message:"created",
-        createdEvent:event
+        message: "created",
+        createdEvent: event
     })
-  });
-  
-router.get('/getEvent/:id',(req,res,next)=>{
+});
+
+router.get('/getEvent/:id', (req, res, next) => {
     const id = req.params.id;
     Event.findById(id)
-    .exec()
-    .then(doc=>{
-        res.status(200).json(doc);
-    })
-    .catch(err=>{
-        res.status(500).json({
-            message: "could not find"
+        .exec()
+        .then(doc => {
+            res.status(200).json(doc);
         })
-    });
+        .catch(err => {
+            res.status(500).json({
+                message: "could not find"
+            })
+        });
 })
-router.put('/updateEvent/:id',(req,res,next)=>{
-    const id =req.params.id;
-    const updateOps={};
+router.get('/getuser/:id', (req, res, next) => {
+    const id = req.params.id;
+    console.log(id);
+    User.findById(id)
+        .exec()
+        .then(doc => {
+            res.status(200).json(doc);
+        })
+        .catch(err => {
+            res.status(500).json({
+                message: "could not find"
+            })
+        });
+})
+router.put('/updateEvent/:id', (req, res, next) => {
+    const id = req.params.id;
+    const updateOps = {};
     for (const [key, value] of Object.entries(req.body)) {
-        updateOps[key]= value;
+        updateOps[key] = value;
     }
-    console.log(id)
-    Event.updateOne({_id:id},{$set: updateOps})
-    .exec()
-    .then(doc=>{
-       res.status(200).json(doc)
-    })
-    .catch(err=>{
-        res.status(500).json(err)
-    });
+    Event.updateOne({
+            _id: id
+        }, {
+            $set: updateOps
+        })
+        .exec()
+        .then(doc => {
+            res.status(200).json(doc)
+        })
+        .catch(err => {
+            res.status(500).json(err)
+        });
 })
-  module.exports = router;
-  
+router.delete('/deleteEvent/:id', (req, res, next) => {
+    const id = req.params.id;
+    Event.deleteOne({
+            _id: id
+        })
+        .exec()
+        .then(doc => {
+            res.status(200).json("deleted");
+        })
+        .catch(err => {
+            res.status(500).json(err)
+        });
+})
+router.get('/getAllEvents', (req, res, next) => {
+    Event.find({})
+        .exec()
+        .then(docs => {
+            res.status(200).json(docs);
+        })
+        .catch(err => {
+            res.status(500).json({
+                message: "could not find"
+            });
+        })
+});
+router.post('/participateEvent/:id', (req, res, next) => {
+    const idEvent = req.params.id;
+    const idUser = req.body._id;
+    User.findById(idUser)
+        .exec()
+        .then(userDoc => {
+            Event.findOne({
+                "_id":idEvent,
+                "participators":userDoc
+                
+            }).exec()
+            .then(doc=>{
+                if(doc==null && userDoc!=null){
+                    Event.updateOne({
+                        _id: idEvent
+                    }, {
+                        $push: {
+                            participators: userDoc
+                        }
+                    })
+                    .exec()
+                    .then(doc => {
+                        res.status(200).json("partipated")
+                    })
+                    .catch(err => {
+                        res.status(500).json(err);
+                    })
+                }else
+                    res.status(200).json("already partipated or user is inexist")
+            })
+        })
+        .catch(err => {
+            res.status(500).json({
+                message: "could not find"
+            })
+        });
+});
+
+
+module.exports = router;
