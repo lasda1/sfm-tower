@@ -3,6 +3,7 @@ var router = express.Router();
 var Event = require('../models/event');
 var User = require('../models/user')
 var ObjectId = require('mongoose').Types.ObjectId; 
+var cron = require('node-cron');
 router.post('/addEvent', function (req, res, next) {
     const event = new Event({
         name: req.body.name,
@@ -160,6 +161,7 @@ router.get('/getUserParticipatingEvent/:idUser',(req,res,next)=>{
     Event.find({ "participators._id" :idUser})
         .exec()
         .then(docs => {
+            console.log(docs)
             res.status(200).json(docs);
         })
         .catch(err => {
@@ -234,6 +236,56 @@ router.get('/getUserInterestedEvent/:idUser',(req,res,next)=>{
             });
         })
 })
-
-
+router.get('/test',(req,res,next)=>{
+    cron.schedule('* * * * *', () => {
+          const idUser=new ObjectId("5c9b99aecb99696676fb5862");
+          
+          Event.find({ "participators._id" :idUser})
+              .exec()
+              .then(docs => {
+                var eventList=[];
+                console.log("Z")
+                docs.forEach(event=>{
+                  var date = new Date(event.startDate);
+                  var date2= Date.now()
+                  var timeDiff = Math.abs(date.getTime() - date2);
+                  var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                  if(diffDays==1){
+                   // 
+                   eventList.push(event)
+                  }
+                        
+                      
+                })
+                
+                if(eventList){
+                    res.status(200).json(eventList)
+                }else
+                    res.status(200).json("No Event")
+              })
+              .catch(err => {
+                console.log(err)
+              })
+      });
+  })
+router.get('/bestEvents',(req,res,next)=>{
+    Event.aggregate(
+        [
+            { "$project": {
+                "name": 1,
+                "description": 1,
+                "lieu": 1,
+                "length": { "$size": "$participators" }
+            }},
+            { "$sort": { "length": -1 } },
+            { "$limit": 2 }
+        ],(err,doc)=>{
+            console.log(err)
+            if(err)
+                res.json(200).json(err)
+            console.log(doc)
+            res.status(200).json(doc)
+        }
+    )
+})
 module.exports = router;

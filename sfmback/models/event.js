@@ -26,10 +26,6 @@ const eventSchema = mongoose.Schema(
             type:Date,
             require: true
         },
-        endDate:{
-            type:Date,
-            require :true
-        },
         participators:[{}],
         interested:[{}]
 
