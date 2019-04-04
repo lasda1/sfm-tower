@@ -15,8 +15,6 @@ router.post('/addEvent', function (req, res, next) {
         endDate: req.body.endDate
 
     });
-
-    console.log(event)
     event
         .save()
         .then(res => {
@@ -288,7 +286,7 @@ router.get('/bestEvents',(req,res,next)=>{
         }
     )
 })
-router.get('/getRecommandetEvent/',(req,res,next)=>{
+router.get('/getRecommandetEvent/', (req,res,next)=>{
     //const idUser=req.params.idUser;
     const userEvents=[]
     User.find({})
@@ -301,21 +299,21 @@ router.get('/getRecommandetEvent/',(req,res,next)=>{
             i++;
             
                 test(u,i,obj=>{
-                            console.log(obj.eventsParticipated)
                             if(obj!=null && obj.eventsParticipated.length!=0)
                                 userEvents.push(obj)
                     if(obj.i==l){
-                        getSimilarUser(userEvents,connectedUser);
                         res.status(200).json(userEvents)
-                        
                     }
                         
                     
                 })
-                      
+               
+                
+                     
             //}
             
         }
+        
         
     })
     .catch(err=>{
@@ -324,7 +322,7 @@ router.get('/getRecommandetEvent/',(req,res,next)=>{
 })
 function test(u,i,callback){
     userEvents=null
-                Event.find({ "participators._id" :u._id})
+                 Event.find({ "participators._id" :u._id})
                     .exec()
                     .then(docs => {
                         userEvents={
@@ -337,6 +335,7 @@ function test(u,i,callback){
                     .catch(err => {
                         callback(err)
                     })  
+                    
 }
 function getSimilarUser(userEvents,connectedUser){
     //eventConnectedUser
